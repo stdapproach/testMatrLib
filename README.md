@@ -9,12 +9,13 @@ The main aims of this project are:
 
 References:
 1. Matrix Algebra
-1.1 [Ru] Уилкинсон Дж.Х., Райнш С. Справочник алгоритмов на языке Алгол. Линейная
-алгебра, М.: Машиностроение, 1976. — 390 с.
-1.1 [Eng] Handbook for Automatic Computation, Volume II: Linear Algebra © 1971
+1.1 [Ru] РЈРёР»РєРёРЅСЃРѕРЅ Р”Р¶.РҐ., Р Р°Р№РЅС€ РЎ. РЎРїСЂР°РІРѕС‡РЅРёРє Р°Р»РіРѕСЂРёС‚РјРѕРІ РЅР° СЏР·С‹РєРµ РђР»РіРѕР». Р›РёРЅРµР№РЅР°СЏ Р°Р»РіРµР±СЂР°
+	Рњ.: РњР°С€РёРЅРѕСЃС‚СЂРѕРµРЅРёРµ, 1976. вЂ” 390 СЃ.
+	Р‘Р‘Рљ Р·973-018.1
+	Р‘Р‘Рљ Р’152.2СЏ2
+1.1 [Eng] Handbook for Automatic Computation, Volume II: Linear Algebra В© 1971
 	ISBN 978-3-642-86940-2
 	Autoren: Wilkinson, John H., Reinsch, C.
 	Herausgeber: Editor-in-chief: Bauer, Friedrich L.
 	Householder, Alston S. (Ed.)
 	Springer-Verlag Berlin
-
