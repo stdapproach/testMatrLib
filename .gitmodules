@@ -1,0 +1,3 @@
+[submodule "3rdParty/armadillo-code"]
+	path = 3rdParty/armadillo-code
+	url = https://github.com/conradsnicta/armadillo-code/
