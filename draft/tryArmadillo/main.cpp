@@ -7,6 +7,7 @@ using namespace std;
 using namespace arma;
 
 namespace matrLib {
+    using uint = unsigned int;
 
 enum class typeLib : unsigned char {
     null = 0x00,
@@ -20,14 +21,44 @@ template<typeLib type> struct description;
 template<> struct description<typeLib::Arma> {
     static std::string name(){return "Armadillo";}
     static std::string version(){return arma_version::as_string();}
+    static constexpr auto typeCode{typeLib::Arma};
+    using type = arma::mat;
 };
 
 template<typeLib type> struct wr;
 
 template<> struct wr<typeLib::Arma> {
+    template<typename T=double>inline // directly specify the matrix size (elements are uninitialised)
+    static Mat <T> mk(unsigned int rows, unsigned int cols){return Mat <T>(rows, cols);}//mat A(2,3);
+
     template<typename T=double>inline
-    static Mat <T> mk(unsigned int rows, unsigned int cols){return Mat <T>(rows, cols);}
+    static uword rows(const Mat<T> A){return A.n_rows;}
+
+    template<typename T=double>inline
+    static uword cols(const Mat<T> A){return A.n_cols;}
 };
+
+struct wr2 {
+    template<typeLib>inline
+    static auto mk(unsigned int rows, unsigned int cols);//->description<type>::type;
+
+    template<>inline
+    static auto mk<typeLib::Arma>(unsigned int rows, unsigned int cols)
+    ->int//description<typeLib::Arma>::type
+    //{return mat(rows, cols);}
+    {return 42;}
+};
+
+namespace Arma {
+    static const auto type{typeLib::Arma};
+    using tDef = double;
+
+    template<typename T=tDef>
+    class Matr : public ::Mat <T> {
+
+    };
+
+}
 
 }
 
@@ -40,13 +71,12 @@ int main()
     cout << "libVersion: " << description<tArma>::version() << endl;
 
     auto A = wr<tArma>::mk(2,3);
-    //mat A(2,3);  // directly specify the matrix size (elements are uninitialised)
+    //auto A2{Arma::Mat(2,3)};
+    cout << "A.n_rows: " << wr<tArma>::rows(A) << endl;  // .n_rows and .n_cols are read only
+    cout << "A.n_cols: " << wr<tArma>::cols(A) << endl;
 
-    cout << "A.n_rows: " << A.n_rows << endl;  // .n_rows and .n_cols are read only
-    cout << "A.n_cols: " << A.n_cols << endl;
-
-//    A(1,2) = 456.0;  // directly access an element (indexing starts at 0)
-//    A.print("A:");
+    A(1,2) = 456.0;  // directly access an element (indexing starts at 0)
+    A.print("A:");
 
 //    A = 5.0;         // scalars are treated as a 1x1 matrix
 //    A.print("A:");
