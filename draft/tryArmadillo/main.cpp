@@ -1,99 +1,90 @@
 #include <iostream>
-#include <string>
+#include "wrarma.h"
 
-#include <armadillo>
+#include "mathutil.h"
 
-using namespace std;
 using namespace arma;
 
-namespace matrLib {
-    using uint = unsigned int;
+void testByArmaExample1() {
+    using namespace matrLib;
+    auto A = wr::mk<typeLib::Arma>(2, 3);
+    cout << "A.n_rows: " << wr::rows(A) << endl;
+    cout << "A.n_cols: " << wr::cols(A) << endl;
 
-enum class typeLib : unsigned char {
-    null = 0x00,
-    unkn = 0x01,
-    Arma = 0x10 , // Armadillo
-    // also ...
-};
+    wr::elem(A, 1, 2) = 456.0;  // directly access an element (indexing starts at 0)
+    wr::print("A:", A);
+    //================
 
-template<typeLib type> struct description;
+    wr::assign(A, 5.0);// scalars are treated as a 1x1 matrix
+    wr::print("A:", A);
 
-template<> struct description<typeLib::Arma> {
-    static std::string name(){return "Armadillo";}
-    static std::string version(){return arma_version::as_string();}
-    static constexpr auto typeCode{typeLib::Arma};
-    using type = arma::mat;
-};
+    wr::set_size(A, 4, 5); // change the size (data is not preserved)
+    wr::print("A:", wr::fill(A, 5));
 
-template<typeLib type> struct wr;
+    // endr indicates "end of row"
+    A << 0.165300 << 0.454037 << 0.995795 << 0.124098 << 0.047084 << endr
+      << 0.688782 << 0.036549 << 0.552848 << 0.937664 << 0.866401 << endr
+      << 0.348740 << 0.479388 << 0.506228 << 0.145673 << 0.491547 << endr
+      << 0.148678 << 0.682258 << 0.571154 << 0.874724 << 0.444632 << endr
+      << 0.245726 << 0.595218 << 0.409327 << 0.367827 << 0.385736 << endr;
+    A.print("A:");
+    cout << "det(A): " << wr::det(A) << endl;
 
-template<> struct wr<typeLib::Arma> {
-    template<typename T=double>inline // directly specify the matrix size (elements are uninitialised)
-    static Mat <T> mk(unsigned int rows, unsigned int cols){return Mat <T>(rows, cols);}//mat A(2,3);
+    // inverse
+    cout << "inv(A): " << endl << wr::inv(A) << endl;
 
-    template<typename T=double>inline
-    static uword rows(const Mat<T> A){return A.n_rows;}
+    // save matrix as a text file
+    wr::save(A, "A.txt");
 
-    template<typename T=double>inline
-    static uword cols(const Mat<T> A){return A.n_cols;}
-};
-
-struct wr2 {
-    template<typeLib>inline
-    static auto mk(unsigned int rows, unsigned int cols);//->description<type>::type;
-
-    template<>inline
-    static auto mk<typeLib::Arma>(unsigned int rows, unsigned int cols)
-    ->int//description<typeLib::Arma>::type
-    //{return mat(rows, cols);}
-    {return 42;}
-};
-
-namespace Arma {
-    static const auto type{typeLib::Arma};
-    using tDef = double;
-
-    template<typename T=tDef>
-    class Matr : public ::Mat <T> {
-
-    };
-
+    // load from file
+    mat B;
+    wr::load(B, "A.txt");
+    B.print("B:");
+    //cout << "A==B: " << (A == B) << endl;
 }
 
-}
+//using M = matrLib::description<matrLib::typeLib::Arma>::type;
+//auto matVariation(const M& A, const M& B) {
+//    M B2 = B;
+//    auto absB = matrLib::wr::for_each_abs(B2);
+//    M res0 = A-B;
+//    auto res = matrLib::wr::for_each_abs(res0);
+//    auto maxB2Elem = absB.max();
+//    return matrLib::wr::for_each(res, [maxB2Elem](arma::mat::elem_type& val){ val /= maxB2Elem;});
+//}
+
 
 int main()
 {
     using namespace matrLib;
     const auto tArma{typeLib::Arma};
     cout << "Hello World!" << endl;
-    cout << "libName: " << description<tArma>::name() << endl;
+    cout << "libName: " << description<tArma>::name << endl;
     cout << "libVersion: " << description<tArma>::version() << endl;
 
-    auto A = wr<tArma>::mk(2,3);
-    //auto A2{Arma::Mat(2,3)};
-    cout << "A.n_rows: " << wr<tArma>::rows(A) << endl;  // .n_rows and .n_cols are read only
-    cout << "A.n_cols: " << wr<tArma>::cols(A) << endl;
+    //testByArmaExample1();
 
-    A(1,2) = 456.0;  // directly access an element (indexing starts at 0)
-    A.print("A:");
-
-//    A = 5.0;         // scalars are treated as a 1x1 matrix
-//    A.print("A:");
-
-
-//    A.set_size(4,5); // change the size (data is not preserved)
-//    A.fill(5.0);     // set all elements to a particular value
-//    A.print("A:");
-
-//    // endr indicates "end of row"
-//      A << 0.165300 << 0.454037 << 0.995795 << 0.124098 << 0.047084 << endr
-//        << 0.688782 << 0.036549 << 0.552848 << 0.937664 << 0.866401 << endr
-//        << 0.348740 << 0.479388 << 0.506228 << 0.145673 << 0.491547 << endr
-//        << 0.148678 << 0.682258 << 0.571154 << 0.874724 << 0.444632 << endr
-//        << 0.245726 << 0.595218 << 0.409327 << 0.367827 << 0.385736 << endr;
-
-//      A.print("A:");
+    auto G7 = wr::mk<typeLib::Arma>(1, 1);
+    bool res = wr::load(G7, "../tests/Gilbert7_o.prn");
+    G7.print("G7:");
+    //
+    auto detG7_t = wr::det(G7);
+    auto detG7_o_m = wr::mk<typeLib::Arma>(1, 1);
+    wr::load(detG7_o_m, "../tests/detGilbert7_o.prn");
+    auto detG7_o = wr::elem(detG7_o_m, 0, 0);
+    cout << "detG7_t=" << detG7_t << " , detG7_o=" << detG7_o << endl;
+    cout << "variation(detG7)=" << mathUtil::variation(detG7_t, detG7_o) << endl;
+    //
+    auto invG7_t = wr::inv(G7);
+    //invG7_t.print("invG7_t:");
+    auto invG7_o = wr::mk<typeLib::Arma>(1, 1);
+    wr::load(invG7_o, "../tests/invG7_o.prn");
+    //
+    using M = matrLib::description<matrLib::typeLib::Arma>::type;
+    auto mVarInvG7 = mathUtil::matVariation<M>(invG7_t, invG7_o);
+    mVarInvG7.print("mVarInvG7:");
+    auto interval = wr::getInterval(mVarInvG7);
+    cout << wr::intervalToString(interval).str() << endl;
 
     return 0;
 }
