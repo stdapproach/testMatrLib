@@ -10,6 +10,76 @@ namespace wr {
     template<> inline
     auto mk<typeLib::Arma>(uint rows, uint cols){return arma::mat(rows, cols);}
 
+    struct _ {
+        using enumT = unsigned char;
+
+        template<enumT>
+        static auto make(uint rows, uint cols);
+
+        template<> inline
+        static auto make<typeLib::Arma>(uint rows, uint cols){
+            return arma::mat(rows, cols);
+        }
+
+        template<enumT>
+        static auto make();
+
+        template<> inline
+        static auto make<typeLib::Arma>(){
+            return arma::mat(1, 1);
+        }
+
+        template<enumT>
+        static auto load(const char* fileName);
+
+        template<> inline
+        static auto load<typeLib::Arma>(const char* fileName) {
+            arma::mat&& t = arma::mat(1, 1);
+            /*auto res =*/ t.load(fileName);
+            return t;
+        }
+
+        template<enumT, typename M, typename Elem>
+        static auto for_each(M& t, std::function<void(Elem& val)> f);
+
+        template<> inline
+        static auto for_each
+        <typeLib::Arma, arma::mat, arma::mat::elem_type>(
+                arma::mat& t, std::function<void(arma::mat::elem_type& val)> f) {
+            t.for_each(f);
+            return t;
+        }
+
+        template<enumT, typename M>
+        static auto for_each_abs(M& t);
+
+        template<> inline
+        static auto for_each_abs<typeLib::Arma>(arma::mat& t) {
+            return for_each<typeLib::Arma, arma::mat, arma::mat::elem_type>(t, [](arma::mat::elem_type& val) { val = fabs(val); });
+        }
+
+        template<enumT t>
+        static auto matVariation(
+                const typename description<t>::type&,
+                const typename description<t>::type&);
+
+        template<> inline
+        static auto matVariation<typeLib::Arma>(
+                const description<typeLib::Arma>::type& A,
+                const description<typeLib::Arma>::type& B){
+           using M = description<typeLib::Arma>::type;
+           M B2 = B;
+           auto absB = matrLib::wr::_::for_each_abs<typeLib::Arma>(B2);
+           M res0 = A-B;
+           auto res = matrLib::wr::_::for_each_abs<typeLib::Arma>(res0);
+           auto maxB2Elem = absB.max();
+           return matrLib::wr::_::for_each<typeLib::Arma, arma::mat, arma::mat::elem_type>(
+                       res, [maxB2Elem](arma::mat::elem_type& val){ val /= maxB2Elem;}
+           );
+        }
+    };
+
+
     template<> inline
     auto rows<arma::mat>(const arma::mat& m){return m.n_rows;}// .n_rows and .n_cols are read only
 
@@ -55,15 +125,6 @@ namespace wr {
     template<> inline
     auto load<arma::mat>(arma::mat& t, const char* fileName) {
         return t.load(fileName);
-    }
-
-    auto for_each(arma::mat& t, std::function<void(arma::mat::elem_type& val)> f) {
-        t.for_each(f);
-        return t;
-    }
-
-    auto for_each_abs(arma::mat& t) {
-        return for_each(t, [](arma::mat::elem_type& val) { val = fabs(val); });
     }
 
     auto getInterval(const arma::mat& t) {

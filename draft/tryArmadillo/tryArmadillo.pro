@@ -5,7 +5,8 @@ CONFIG -= qt
 
 #QMAKE_CXXFLAGS += -std=c++17
 
-INCLUDEPATH += $$PWD/../../3rdParty/armadillo-code/include
+INCLUDEPATH += $$PWD/../../3rdParty/armadillo-code/include \
+               ../tests
 LIBS += $$PWD/../../3rdParty/armadillo-code/examples/lib_win64/lapack_win64_MT.lib
 LIBS += $$PWD/../../3rdParty/armadillo-code/examples/lib_win64/blas_win64_MT.lib
 
@@ -16,4 +17,5 @@ HEADERS += \
     description.h \
     traitwr.h \
     wrarma.h \
-    mathutil.h
+    mathutil.h \
+    ../tests/test.h
