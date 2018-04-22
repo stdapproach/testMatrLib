@@ -10,6 +10,12 @@ namespace wr {
     template<> inline
     auto mk<typeLib::Arma>(uint rows, uint cols){return arma::mat(rows, cols);}
 
+template<> inline
+auto& elem<arma::mat>(arma::mat& m, int row, int col){return m(row, col);}
+
+template<> inline
+const auto& elem<arma::mat>(const arma::mat& m, int row, int col){return m(row, col);}
+
     struct _ {
         using enumT = unsigned char;
 
@@ -39,6 +45,17 @@ namespace wr {
             return t;
         }
 
+        template<enumT>
+        static auto loadNumber(const char* fileName);
+
+        template<> inline
+        static auto loadNumber<typeLib::Arma>(const char* fileName) {
+            auto t = arma::mat(1, 1);
+            t.load(fileName);
+            auto res = wr::elem(t, 0, 0);
+            return res;
+        }
+
         template<enumT, typename M, typename Elem>
         static auto for_each(M& t, std::function<void(Elem& val)> f);
 
@@ -58,24 +75,12 @@ namespace wr {
             return for_each<typeLib::Arma, arma::mat, arma::mat::elem_type>(t, [](arma::mat::elem_type& val) { val = fabs(val); });
         }
 
-        template<enumT t>
-        static auto matVariation(
-                const typename description<t>::type&,
-                const typename description<t>::type&);
+        template<enumT, typename M>
+        static auto abs(M& t);
 
         template<> inline
-        static auto matVariation<typeLib::Arma>(
-                const description<typeLib::Arma>::type& A,
-                const description<typeLib::Arma>::type& B){
-           using M = description<typeLib::Arma>::type;
-           M B2 = B;
-           auto absB = matrLib::wr::_::for_each_abs<typeLib::Arma>(B2);
-           M res0 = A-B;
-           auto res = matrLib::wr::_::for_each_abs<typeLib::Arma>(res0);
-           auto maxB2Elem = absB.max();
-           return matrLib::wr::_::for_each<typeLib::Arma, arma::mat, arma::mat::elem_type>(
-                       res, [maxB2Elem](arma::mat::elem_type& val){ val /= maxB2Elem;}
-           );
+        static auto abs<typeLib::Arma>(arma::mat& t) {
+            return arma::abs(t);
         }
     };
 
@@ -86,11 +91,7 @@ namespace wr {
     template<> inline
     auto cols<arma::mat>(const arma::mat& m){return m.n_cols;}
 
-    template<> inline
-    auto& elem<arma::mat>(arma::mat& m, int row, int col){return m(row, col);}
 
-    template<> inline
-    const auto& elem<arma::mat>(const arma::mat& m, int row, int col){return m(row, col);}
 
     template<> inline
     void print<arma::mat>(const char* prefix, const arma::mat& m){m.print(prefix);}
@@ -108,22 +109,23 @@ namespace wr {
     }
 
     template<> inline
-    auto det<arma::mat>(const arma::mat& t) {
+    auto det(const arma::mat& t) {
         return arma::det(t);
     }
 
     template<> inline
-    auto inv<arma::mat>(const arma::mat& t) {
-        return arma::inv(t);
+    auto inv(const arma::mat& t) {
+        arma::mat res = arma::inv(t);
+        return res;
     }
 
     template<> inline
-    auto save<arma::mat>(const arma::mat& t, const char* fileName) {
+    auto save(const arma::mat& t, const char* fileName) {
         return t.save(fileName, arma::raw_ascii);
     }
 
     template<> inline
-    auto load<arma::mat>(arma::mat& t, const char* fileName) {
+    auto load(arma::mat& t, const char* fileName) {
         return t.load(fileName);
     }
 
@@ -131,11 +133,101 @@ namespace wr {
         return std::make_tuple(t.min(), t.max());
     }
 
-    template<typename T>
+    template<typename T> inline
     auto intervalToString(const std::tuple<T,T>& t) {
         std::ostringstream buf;
         buf << "(" << std::get<0>(t) << "; " << std::get<1>(t) << ")";
         return buf;
+    }
+
+    template<typename T> inline
+    auto variation(const T& A, const T& B);
+
+    template<> inline
+    auto variation(const arma::mat& A, const arma::mat& B)
+    {
+       using M = arma::mat;
+       M B2 = B;
+       auto absB = matrLib::wr::_::for_each_abs<typeLib::Arma>(B2);
+       M res0 = A-B;
+       auto res = matrLib::wr::_::for_each_abs<typeLib::Arma>(res0);
+       auto maxB2Elem = absB.max();
+       return matrLib::wr::_::for_each<typeLib::Arma, arma::mat, arma::mat::elem_type>(
+                   res, [maxB2Elem](arma::mat::elem_type& val){ val /= maxB2Elem;}
+       );
+    }
+
+    template<> inline// Obtain the magnitude of each element
+    auto abs(const arma::mat& t) {
+        arma::mat res = arma::abs(t);
+        return res;
+    }
+
+    template<> inline// Obtain the complex conjugate of each element in a complex matrix or cube
+    auto conj(const arma::mat& t) {
+        arma::mat res = arma::conj(t);
+        return res;
+    }
+
+    template<> inline// extremum value of any matrix
+    auto max(const arma::mat& t) {
+        return t.max();
+    }
+
+    template<> inline
+    auto maxAbs(const arma::mat& t) {
+        auto a = arma::abs(t);
+        return a.max();
+    }
+
+    template<> inline//hermitian matrix
+    auto hermit(const arma::mat& t) {
+        auto r = t.t();
+        return r;
+    }
+
+    template<> inline
+    auto trace(const arma::mat& t) {
+        auto r = arma::trace(t);
+        return r;
+    }
+
+    template<> inline
+    auto normFrobenius(const arma::mat& t) {
+        auto r = arma::norm(t, "fro");
+        return r;
+    }
+
+    template<> inline
+    auto normFrobenius2(const arma::mat& t) {
+        auto th = hermit(t);
+        auto m = t*th;
+        auto tr = trace(m);
+        auto res = sqrt(tr);
+        return res;
+    }
+
+    template<> inline// Frobenius norm div by matrMaxElem
+    auto nFr(const arma::mat& t) {
+        auto n0 = normFrobenius(t);
+        auto maxElem = maxAbs(t);
+        auto res = n0/maxElem;
+        return res;
+    }
+
+    template<> inline
+    auto distFrobenius(const arma::mat& a, const arma::mat& b) {
+        arma::mat c = a-b;
+        auto res = normFrobenius(c);
+        return res;
+    }
+
+    template<> inline// Frobenius norm div by matrMaxElem(a-b)
+    auto dFr(const arma::mat& a, const arma::mat& b) {
+        auto d0 = distFrobenius(a, b);
+        arma::mat c = a-b;
+        auto denom = maxAbs(c);
+        return d0/denom;
     }
 }
 

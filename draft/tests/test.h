@@ -2,9 +2,46 @@
 #define TEST_H
 
 #include <iostream>
+#include <string>
 #include "wrarma.h"
 
 namespace test {
+
+inline
+bool checkValue_(double val, double testVal, double maxDeviation) {
+    auto dev = fabs(val-testVal);
+    return dev <= fabs(maxDeviation);
+}
+
+inline
+void checkValue(std::string caption, double val, double testVal, double maxDeviation) {
+    auto dev = fabs(val-testVal);
+    auto aDev = fabs(maxDeviation);
+    bool pred = dev <= aDev;
+    if (pred) {
+        std::cout << caption << " is OK" << std::endl;
+    } else {
+        std::cout << caption << " is NOK: " << "abs(dev)=" << dev << ", maxDev=" << maxDeviation << std::endl;
+    }
+}
+
+inline
+bool checkValueRel_(double val, double testVal, double maxDeviation) {
+    auto dev = fabs(val-testVal);
+    return fabs(dev)/fabs(testVal) <= maxDeviation;
+}
+
+inline
+void checkValueRel(std::string caption, double val, double testVal, double maxDeviation) {
+    auto dev = fabs(val-testVal);
+    auto aDev = fabs(maxDeviation);
+    bool pred = dev/fabs(testVal) <= aDev;
+    if (pred) {
+        std::cout << caption << " is OK" << std::endl;
+    } else {
+        std::cout << caption << " is NOK: " << "abs(dev)=" << dev << ", maxDev=" << maxDeviation << std::endl;
+    }
+}
 
 inline
 void byArmaExample1() {
@@ -19,6 +56,8 @@ void byArmaExample1() {
 
     wr::elem(A, 1, 2) = 456.0;  // directly access an element (indexing starts at 0)
     wr::print("A:", A);
+
+    auto A2 = wr::_::make<M>();
 
     wr::assign(A, 5.0);// scalars are treated as a 1x1 matrix
     wr::print("A:", A);

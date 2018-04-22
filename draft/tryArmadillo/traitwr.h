@@ -41,6 +41,39 @@ namespace wr {
 
     template<typename T> inline
     auto load(T& t, const char* fileName);
+
+    template<typename T> inline
+    auto abs(const T& t);// Obtain the magnitude of each element
+
+    template<typename T> inline
+    auto conj(const T& t);// Obtain the complex conjugate of each element in a complex matrix or cube
+
+    template<typename T> inline
+    auto max(const T& t);// extremum value of any matrix
+
+    template<typename T> inline
+    auto maxAbs(const T& t);
+
+    template<typename T> inline
+    auto hermit(const T& t);//hermitian matrix
+
+    template<typename T> inline
+    auto trace(const T& t);
+
+    template<typename T> inline
+    auto normFrobenius(const T& t);
+
+    template<typename T> inline
+    auto normFrobenius2(const T& t);
+
+    template<typename T> inline
+    auto nFr(const T& t);// Frobenius norm div by matrMaxElem
+
+    template<typename T> inline
+    auto distFrobenius(const T& a, const T& b);
+
+    template<typename T> inline
+    auto dFr(const T& a, const T& b);// Frobenius norm div by matrMaxElem(a-b)
 }
 
 }
