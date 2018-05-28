@@ -1,7 +1,7 @@
 #test math
 import numpy as np
-#import scipy as sp
 import scipy.linalg as spla
+from numpy import linalg as npla
 
 def readVector(path):
 	A = np.loadtxt(path)
@@ -170,8 +170,85 @@ def mk3DiagMatr(d0, d1, d2):
 
 A_p61_t = mk3DiagMatr(genGdiag_A61(), ftDiag_A61(), sndDiag_A61())
 #print(A_p61_t)
-detAp61_t = det(A_p61_t)
+#detAp61_t = det(A_p61_t)
 #print("detAp61_t=", detAp61_t)
-det_A_p61_o = 4.10400390 * 0.1 * np.power(2, 12)
+#det_A_p61_o = 4.10400390 * 0.1 * np.power(2, 12)
 #print("det_A_p61_o=", det_A_p61_o)
-print("delta=", deltaRel(detAp61_t, det_A_p61_o))
+#print("delta=", deltaRel(detAp61_t, det_A_p61_o))
+#
+#b_p62 = mkVec_e(40, 0)
+#x_p62_t = lsolve(A_p61_t, b_p62)
+#print("x_p62_t=",x_p62_t)
+#page 88
+size_p88 = 7
+def d0_Ap88():
+	R = mkVecByDig(6, size_p88)
+	R[0] = 5
+	R[-1] = 5
+	return R
+#
+#print(d0_Ap88())
+#ftDiag_A_p88 = mkVecByDig(-4, size_p88 - 1)
+#sdDiag_A_p88 = mkVecByDig(1, size_p88 - 2)
+#A_p88_t = mk3DiagMatr(d0_Ap88(), ftDiag_A_p88, sdDiag_A_p88)
+#print("A_p88_t=", A_p88_t)
+#b_p88 = mkVec_e(size_p88, 4-1)
+#print("b_p88=", b_p88)
+#x_p88_t = lsolve(A_p88_t, b_p88)
+#x_p88_o = np.array([4,7.5,10,11,10,7.5,4])
+#print("del(x_p88_t)=", matVariation(x_p88_t, x_p88_o))
+#page105
+#b_p105 = mkVec_e(size_p88, 4) * 360360
+#print("b_p105=", b_p105)
+#x_p105_t = lsolve(G7_o, b_p105)
+#print("x_p105_t=", x_p105_t)
+#page 188
+size_p188 = 44
+
+def d0_p188():
+	R = mkVecByDig(6, size_p188)
+	R[0] = 5
+	R[-1] = 5
+	return R
+
+def d1_p188():
+	R = mkVecByDig(3, size_p188 - 1)
+	R[0] = 2
+	R[-1] = 2
+	return R
+
+d2_p188 = mkVecByDig(1, size_p188 - 2)
+d3_p188 = mkVecByDig(1, size_p188 - 3)
+#print("d0_p188=", d0_p188())
+#
+def mk4DiagMatr(d0, d1, d2, d3):
+	n = len(d0)
+	M = np.zeros((n, n))
+	M = fillerMatr(d0, gen0Diag, M)
+	M = fillerMatr(d1, gen1Diag, M)
+	M = fillerMatr(d2, gen2Diag, M)
+	M = fillerMatr(d3, gen3Diag, M)
+	return M
+
+B_p188 = mk4DiagMatr(d0_p188(), d1_p188(), d2_p188, d3_p188)
+eigVal_188, eigVel_188 = npla.eig(B_p188)
+#eigVal_188 = np.sort(eigVal_188)
+#print("B_p188=", B_p188)
+#w, v = npla.eig(np.diag((1, 2, 3)))
+#print("eigVal_188=", eigVal_188)
+#print("v=", v)
+
+import numpy as np
+from numpy import linalg as npla
+#
+def eigen(A):
+	eigenValues, eigenVectors = npla.eig(A)
+	idx = np.argsort(eigenValues)
+	eigenValues = eigenValues[idx]
+	eigenVectors = eigenVectors[:,idx]
+	return (eigenValues, eigenVectors)
+#
+evs_p188 = eigen(B_p188)
+evals188 = evs_p188[0]
+evecs188 = evs_p188[1]
+print(evecs188[:, 14])
