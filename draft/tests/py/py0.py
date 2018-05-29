@@ -65,6 +65,9 @@ def inv(A):
 def mkVecByDig(value, size):
 	return np.full((size, 1), value)
 
+def diag(vec):
+	return np.diag(vec)
+
 path_G7 = "..\\Gilbert7_o.prn"
 G7_o = np.loadtxt(open(path_G7, "rb"), delimiter="\t", skiprows=0)
 #print(G7_o)#print(G7_o.shape)
@@ -238,17 +241,85 @@ eigVal_188, eigVel_188 = npla.eig(B_p188)
 #print("eigVal_188=", eigVal_188)
 #print("v=", v)
 
-import numpy as np
-from numpy import linalg as npla
-#
 def eigen(A):
 	eigenValues, eigenVectors = npla.eig(A)
 	idx = np.argsort(eigenValues)
 	eigenValues = eigenValues[idx]
 	eigenVectors = eigenVectors[:,idx]
 	return (eigenValues, eigenVectors)
+
+def eigenvals(A):
+	v = npla.eigvals(A)
+	return np.sort(v)
+
+#evs_p188 = eigen(B_p188)
+#evals188 = evs_p188[0]
+#evecs188 = evs_p188[1]
+#print(evecs188[:, 14])
 #
-evs_p188 = eigen(B_p188)
-evals188 = evs_p188[0]
-evecs188 = evs_p188[1]
-print(evecs188[:, 14])
+#D = diag([-1, 1])
+#print(D)
+#print(eigenvals(D))
+# page 200
+A_p200 = np.array([[10,1,2,3,4],
+	[1,9,-1,2,-3],
+	[2,-1,7,3,-5],
+	[3,2,3,12,-1],
+	[4,-3,-5,-1,15]])
+#print("A_p200=", A_p200)
+#eigenvals_Ap200_t1 = eigenvals(A_p200)
+#print("eigenvals_Ap200_t1=", eigenvals_Ap200_t1)
+#
+B_p200 = np.array([[5,1,-2,0,-2,5],
+	[1,6,-3,2,0,6],
+	[-2,-3,8,-5,-6,0],
+	[0,2,-5,5,1,-2],
+	[-2,0,-6,1,6,-3],
+	[5,6,0,-2,-3,8]])
+#eigenvals_Bp200_t1 = eigenvals(B_p200)
+#print("eigenvals_Bp200_t1=", eigenvals_Bp200_t1)
+
+#eigenVecs_Ap200_t1 = eigen(A_p200)[1]
+#print("eigenVecs_Ap200_t1=", eigenVecs_Ap200_t1)
+#print("v3=", npla.eig(A_p200)[1])
+#page227
+def mkVec_f(size, func):
+	R = mkVec(size)
+	for x in range(0, size):
+		R[x] = func(x)
+	return R
+#
+def d0_Ap227():
+	size = 30
+	return mkVec_f(size, lambda x: (x+1) ** 4)
+#
+def d1_Ap227():
+	size = 30-1
+	return mkVec_f(size, lambda x: (x+1) - 1)
+#
+def mk2DiagMatr(d0, d1):
+	n = len(d0)
+	M = np.zeros((n, n))
+	M = fillerMatr(d0, gen0Diag, M)
+	M = fillerMatr(d1, gen1Diag, M)
+	return M
+#
+#A_p227 = mk2DiagMatr(d0_Ap227(), d1_Ap227())
+#print(A_p227)
+#vals_A_p227_t = eigenvals(A_p227)
+#print("vals_A_p227_t=", vals_A_p227_t)
+#page343
+reA_p343 = np.array([[1,-1,2],
+					[0,0,2],
+					[0,-1,3]])
+
+imA_p343 = np.array([[1,-1,2],
+					[0,1,0],
+					[0,0,1]])
+#
+m1C = np.array([[2+3.j, 1-4.j], [3+4.j, 5+6.j]])
+A_p343 = reA_p343 + 1.j*imA_p343
+evals_Ap343 = eigenvals(A_p343)
+evecs_Ap343 = eigen(A_p343)[1]
+print(evals_Ap343)
+print(evecs_Ap343)
